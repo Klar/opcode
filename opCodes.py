@@ -26,67 +26,45 @@ def getOutput(getOpTxs):
     opoutput = dict()
     opreturn = dict()
 
-    opoutput["OP_DUP"] = 0
-    opoutput["OP_HASH160"] = 0
-    opoutput["OP_RETURN"] = 0
+    OP_DUP = dict()
+    OP_DUP["count"] = 0
+
+    OP_HASH160 = dict()
+    OP_HASH160["count"] = 0
+
+    OP_RETURN = dict()
+    OP_RETURN["count"] = 0
 
     for tx in getOpTxs:
         txID = tx["tx"]["h"]
-        print(txID)
+        # print(txID)
+        # print(tx)
         for data in tx["out"]:
             data = data["str"].split(" ")
             if data[0] == "OP_DUP":
-                opoutput["OP_DUP"] = opoutput["OP_DUP"] + 1
+                OP_DUP["count"] = OP_DUP["count"] + 1
+                OP_DUP["txExample"] = tx
             elif data[0] == "OP_HASH160":
-                opoutput["OP_HASH160"] = opoutput["OP_HASH160"] + 1
+                OP_HASH160["count"] = OP_HASH160["count"] + 1
+                OP_HASH160["txExample"] = tx
             elif data[0] == "OP_RETURN":
-                opoutput["OP_RETURN"] = opoutput["OP_RETURN"] + 1
-                # opreturndict = dict()
-                print(data)
-                # print(len(data))
-                # if len(data) == 2:
-                #     ascii = data[1].decode("hex").encode("utf-8")
-                #     # print(ascii)
-                # elif len(data) == 3:
-                #     prefix = data[1]
-                #     # print(prefix)
-                #     if len(data[2]) == 64:
-                #         txID = data[2]
-                #         # print(txID)
-                #     else:
-                #         ascii = data[2].decode("hex").encode("utf-8")
-                #         # print(ascii)
-                # elif len(data) == 4:
-                #     prefix = data[1]
-                #     txID = data[2]
-                #     if len(data[3]) > 1:
-                #         ascii = data[3].decode("hex").encode("utf-8")
-                #         print(ascii)
-                #     # print(prefix)
-                #     # print(txID)
-                # print("\n\n")
-                # opreturndict["txID"] = txID
-                # opreturn["prefix"] =
-                # opreturn["txID"] = txID
-                # opreturn[txID] = opreturndict
+                OP_RETURN["count"] = OP_RETURN["count"] + 1
+                OP_RETURN["txExample"] = tx
+                # print(data)
             else:
                 opoutput[data[0]] = 0
-
-    # prefixes = dict()
-
-    # print(opreturn)
-
-    # print(len(prefixes))
-    # opoutput["OP_RETURN"] = prefixes
+            
+            opoutput["OP_DUP"] = OP_DUP
+            opoutput["OP_HASH160"] = OP_HASH160
+            opoutput["OP_RETURN"] = OP_RETURN
 
     print(json.dumps(opoutput, indent=4, sort_keys=True))
 
 getLatestBlockQuerry = '{"v":3,"q":{"db":["c"],"find":{},"limit":1},"r":{"f":"[.[] | .blk | { current_blockheight: .i} ]"}}'
+getLatestBlock = bitd(getLatestBlockQuerry)
+current_blockheight = getLatestBlock[0]["current_blockheight"]
+# print(current_blockheight)
 
-getLatestBlockQuerry = bitd(getLatestBlockQuerry)
-
-current_blockheight = getLatestBlockQuerry[0]["current_blockheight"]
-print(current_blockheight)
-getOpTxs = '{"v":3,"e":{"out.b1":"hex"},"q":{"db":["c"],"find":{"blk.i":{"$eq":'+ str(current_blockheight) +'}},"limit":10,"project":{"tx.h":1,"out.str":1}}}'
+getOpTxs = '{"v":3,"e":{"out.b1":"hex"},"q":{"db":["c"],"find":{"blk.i":{"$eq":'+ str(current_blockheight) +'}},"limit":1000,"project":{"blk.i":1,"tx.h":1,"out.str":1}}}'
 getOpTxs = bitd(getOpTxs)
 getOutput(getOpTxs)

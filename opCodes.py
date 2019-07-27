@@ -6,14 +6,14 @@ import base64
 import json
 import requests
 
-api_token = ''
+api_token = '147GjmCAREtYv7FdfDivthzcmQLmdEhSYe'
 
 def bitd(querry):
 
     bitdbString64 = base64.b64encode(querry.encode()).decode("utf-8")
     # print(bitdbString64)
 
-    url = "https://bitgraph.network/q/" + bitdbString64
+    url = "https://genesis.bitdb.network/q/1FnauZ9aUH2Bex6JzdcV4eNX7oLSSEbxtN/" + bitdbString64
     headers = {'key': api_token}
 
     response = requests.get(url, headers=headers)
@@ -37,8 +37,6 @@ def getOutput(getOpTxs):
 
     for tx in getOpTxs:
         txID = tx["tx"]["h"]
-        # print(txID)
-        # print(tx)
         for data in tx["out"]:
             data = data["str"].split(" ")
             if data[0] == "OP_DUP":
@@ -50,7 +48,6 @@ def getOutput(getOpTxs):
             elif data[0] == "OP_RETURN":
                 OP_RETURN["count"] = OP_RETURN["count"] + 1
                 OP_RETURN["txExample"] = tx
-                # print(data)
             else:
                 opoutput[data[0]] = 0
             
@@ -63,8 +60,9 @@ def getOutput(getOpTxs):
 getLatestBlockQuerry = '{"v":3,"q":{"db":["c"],"find":{},"limit":1},"r":{"f":"[.[] | .blk | { current_blockheight: .i} ]"}}'
 getLatestBlock = bitd(getLatestBlockQuerry)
 current_blockheight = getLatestBlock[0]["current_blockheight"]
-# print(current_blockheight)
 
-getOpTxs = '{"v":3,"e":{"out.b1":"hex"},"q":{"db":["c"],"find":{"blk.i":{"$eq":'+ str(current_blockheight) +'}},"limit":1000,"project":{"blk.i":1,"tx.h":1,"out.str":1}}}'
+getOpTxs = '{"e":{"out.b1":"hex"},"q":{"find":{"blk.i":'+ str(current_blockheight) +'},"limit":1000,"project":{"blk.i":1,"out.str":1,"tx.h":1}},"v":3}'
+
 getOpTxs = bitd(getOpTxs)
+
 getOutput(getOpTxs)
